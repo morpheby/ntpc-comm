@@ -44,9 +44,7 @@ void CommHandler::setPlatformCompatibilityFlags() {
 	getCommConfigPtr()->c_cc[VTIME] = 50; // 5 sec timeout
 	getCommConfigPtr()->c_cc[VMIN] = 0; // no minimum
 	getCommConfigPtr()->c_cflag |= CLOCAL;
-//	getCommConfigPtr()->c_cflag &= ~CLOCAL;
 	getCommConfigPtr()->c_iflag &= ~IGNBRK;
-//	getCommConfigPtr()->c_lflag |= ICANON;
 	writeConfig();
 }
 
@@ -83,20 +81,34 @@ bool CommHandler::isRecieveEnabled() const {
 void CommHandler::setParityMode(ParityMode mode) {
 	switch(mode) {
 	case ParityMode::NONE:
-		getCommConfigPtr()->c_cflag &= ~(PARENB | PARODD | CMSPAR);
+		getCommConfigPtr()->c_cflag &= ~(PARENB | PARODD
+#ifndef NO_SPACEMARK_PARITY
+				| CMSPAR
+#endif
+				);
 		break;
 	case ParityMode::EVEN:
-		getCommConfigPtr()->c_cflag = (getCommConfigPtr()->c_cflag & (~(PARODD | CMSPAR))) | PARENB;
+		getCommConfigPtr()->c_cflag = (getCommConfigPtr()->c_cflag & (~(PARODD
+#ifndef NO_SPACEMARK_PARITY
+				| CMSPAR
+#endif
+				))) | PARENB;
 		break;
 	case ParityMode::ODD:
-		getCommConfigPtr()->c_cflag = (getCommConfigPtr()->c_cflag & (~CMSPAR)) | PARODD | PARENB;
+		getCommConfigPtr()->c_cflag = (getCommConfigPtr()->c_cflag
+#ifndef NO_SPACEMARK_PARITY
+				& (~CMSPAR)
+#endif
+				) | PARODD | PARENB;
 		break;
+#ifndef NO_SPACEMARK_PARITY
 	case ParityMode::MARK:
 		getCommConfigPtr()->c_cflag |= PARODD | PARENB | CMSPAR;
 		break;
 	case ParityMode::SPACE:
 		getCommConfigPtr()->c_cflag = (getCommConfigPtr()->c_cflag & (~PARODD)) | PARENB | CMSPAR;
 		break;
+#endif
 	default:
 		break;
 	}
@@ -106,12 +118,15 @@ void CommHandler::setParityMode(ParityMode mode) {
 ParityMode CommHandler::getParityMode() const {
 	auto cflag = getCommConfigPtr()->c_cflag;
 	if(cflag & PARENB) {
+#ifndef NO_SPACEMARK_PARITY
 		if(cflag & CMSPAR) {
 			if(cflag & PARODD)
 				return ParityMode::MARK;
 			else
 				return ParityMode::SPACE;
-		} else {
+		} else
+#endif
+		{
 			if(cflag & PARODD)
 				return ParityMode::ODD;
 			else

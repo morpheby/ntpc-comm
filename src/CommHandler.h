@@ -11,10 +11,6 @@
 #include <termios.h>
 #include <memory>
 
-#ifndef CMSPAR
-#define CMSPAR	0x40000000L
-#endif
-
 namespace comm {
 namespace internal {
 
@@ -27,8 +23,10 @@ enum class ParityMode {
 	NONE,
 	ODD,
 	EVEN,
+#ifndef NO_SPACEMARK_PARITY
 	MARK,
-	SPACE
+	SPACE,
+#endif
 };
 
 class CommHandler {
