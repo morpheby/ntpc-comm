@@ -13,7 +13,6 @@ bin_PROGRAMS                = $(bins)/ntpccomm
 
 __bins__ntpccomm_SOURCES	=									\
 								main.cpp						\
-								CommHandler.cpp					\
 								Log.cpp							\
 								Logger.cpp						\
 								SerialComm.cpp					\
@@ -23,11 +22,15 @@ __bins__ntpccomm_SOURCES	=									\
 								Logger.h						\
 								SerialComm.h					\
 								SerialComm.hpp					
-								
 
+EXTRA__bins__ntpccomm_SOURCES	= 								\
+									CommHandler-unix.cpp		\
+									CommHandler-windows.cpp		
+									
+
+__bins__ntpccomm_LDADD			= $(COMMHANDLER_SYSTEM)
+__bins__ntpccomm_DEPENDENCIES	= $(COMMHANDLER_SYSTEM)
 __bins__ntpccomm_LDFLAGS		= 
-__bins__ntpccomm_LDADD			= 
-__bins__ntpccomm_DEPENDENCIES	= 
 							
 CLEANFILES					= 
 

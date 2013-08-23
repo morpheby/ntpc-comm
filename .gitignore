@@ -8,6 +8,7 @@ build*/
 .cproject
 .project
 .settings
+.autotools
 
 
 # Application-generated stuff
@@ -30,6 +31,7 @@ configure
 depcomp
 install-sh
 missing
+autom4te.cache/
 
 # OS stuff
 .DS_Store

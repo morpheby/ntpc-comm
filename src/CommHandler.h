@@ -8,16 +8,30 @@
 #ifndef COMMHANDLER_H_
 #define COMMHANDLER_H_
 
+#ifdef HAVE_TERMIOS_H
 #include <termios.h>
+#endif
+
 #include <memory>
 
 namespace comm {
 namespace internal {
 
 typedef int _CommFlags_t;
+
+#ifdef COMM_USE_WINDOWS_BACKEND
+typedef unsigned long _CommSpeed_t;
+#else
 typedef speed_t _CommSpeed_t;
+#endif
+
 typedef int _CommHandle_t;
+
+#ifdef COMM_USE_WINDOWS_BACKEND
+#define unsigned long _CommCfg_t;
+#else
 typedef termios _CommCfg_t;
+#endif
 
 enum class ParityMode {
 	NONE,

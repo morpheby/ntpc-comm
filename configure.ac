@@ -15,9 +15,15 @@ AC_DEFINE([PACKAGE_AUTHOR], ["Morpheby"], [Author of the package])
 
 AC_DEFINE([PACKAGE_COPYRIGHT], ["Copyright (C) 2012 " PACKAGE_AUTHOR ". Licensed under GNU GPL"], [Copyright])
 
-AC_DEFINE([DEBUG], [], ["Use for building with debug information"])
-
-AC_CONFIG_SUBDIRS([wincpp])
+AC_ARG_ENABLE([debug],
+[  --enable-debug    Turn on debugging],
+[case "${enableval}" in
+  yes)
+	AC_DEFINE([DEBUG], [], ["Use for building with debug information"])
+  ;;
+  no) ;;
+  *) AC_MSG_ERROR([bad value ${enableval} for --enable-debug]) ;;
+esac],[])
 
 AC_CANONICAL_TARGET
 if [[ ${target_cpu} == x86_64 ]]; then
@@ -26,7 +32,7 @@ else
 	cxx_target=-m32
 fi
 
-if [[ ${target_vendor} == mingw32 ]]; then
+if [[ ${target_os} == mingw32 ]]; then
 	cxx_target=${cxx_target} -mconsole -municode
 fi
 
@@ -35,6 +41,12 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([.])
 AM_INIT_AUTOMAKE
+
+case $target_os in
+  mingw32) COMMHANDLER_SYSTEM='CommHandler-windows.$(OBJEXT)' ;;
+  *)       COMMHANDLER_SYSTEM='CommHandler-unix.$(OBJEXT)' ;;
+esac
+AC_SUBST([COMMHANDLER_SYSTEM])
 
 # Checks for programs.
 AC_PROG_CXX

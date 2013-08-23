@@ -5,6 +5,8 @@
  *      Author: morpheby
  */
 
+#include "platform.h"
+
 #include "SerialComm.h"
 #include <termios.h>
 #include <fcntl.h>
@@ -112,6 +114,7 @@ uint16_t SerialComm::processParityBit(char recieved, bool isParityError,
 		internal::ParityMode parMode) {
 	uint16_t rcv = (uint8_t) recieved;
 	switch(parMode) {
+#ifndef NO_SPACEMARK_PARITY
 	case internal::ParityMode::SPACE:
 		if(isParityError)
 			rcv |= (1<<8);
@@ -120,6 +123,7 @@ uint16_t SerialComm::processParityBit(char recieved, bool isParityError,
 		if(!isParityError)
 			rcv |= (1<<8);
 		break;
+#endif
 	case internal::ParityMode::ODD:
 		if(getOddParity(recieved) == !isParityError)
 			rcv |= (1<<8);
@@ -192,15 +196,15 @@ void SerialComm::dataReader() {
 	}
 }
 
-int SerialComm::readNoLock(int filedes, uint8_t* buf, int sz) {
-	int readSz = 0;
+size_t SerialComm::readNoLock(int filedes, uint8_t* buf, size_t sz) {
+	size_t readSz = 0;
 	while(readSz < sz) {
 		{
 			std::lock_guard<std::mutex> lock(exitMutex_);
 			if(exiting_)	 // atomically check for exit condition
 				return readSz;
 		}
-		int ret = ::read(filedes, buf+readSz, sz-readSz);
+		ssize_t ret = ::read(filedes, buf+readSz, sz-readSz);
 		if(ret == -1) {
 			util::Logger::getInstance()->logWarning("Error while reading from stream - " +
 					util::Logger::getPosixErrorDescription(errno) + MAKE_DEBUG_STRING());

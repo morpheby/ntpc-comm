@@ -5,6 +5,8 @@
  *      Author: morpheby
  */
 
+#include "platform.h"
+
 #include "Log.h"
 
 #include <iomanip>

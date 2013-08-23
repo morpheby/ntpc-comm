@@ -5,6 +5,8 @@
  *      Author: morpheby
  */
 
+#include "platform.h"
+
 #include "CommHandler.h"
 #include "Logger.h"
 

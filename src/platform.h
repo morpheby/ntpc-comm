@@ -25,11 +25,7 @@
 
 #define WIN32_LEAN_AND_MEAN
 
-#include <windows.h>
-
-#ifndef HAVE_TERMIOS_H
-#define USE_WINDOWS_BACKEND
-#endif
+#define COMM_USE_WINDOWS_BACKEND
 
 #endif /* WIN32 */
 
@@ -48,5 +44,7 @@
 #ifdef NO_SPACEMARK_PARITY
 #undef NO_SPACEMARK_PARITY
 #endif
+
+#endif /* LINUX */
 
 #endif /* PLATFORM_H_ */
