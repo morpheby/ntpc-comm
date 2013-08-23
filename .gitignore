@@ -1,8 +1,35 @@
-.*
+
+# Project stuff
 Debug/
 Release/
 debug*/
 release*/
+.cproject
+.project
+.settings
+
+
+# Application-generated stuff
 *.log
+
+# Compiler generated stuff
 *.o
+*.obj
+
+# Autotools generated stuff
+Makefile.in
+aclocal.m4
+ar-lib
+compile
+config.guess
+config.h.in
+config.h.in~
+config.sub
+configure
+depcomp
+install-sh
+missing
+
+# OS stuff
+.DS_Store
 
