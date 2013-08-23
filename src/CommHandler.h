@@ -21,17 +21,15 @@ typedef int _CommFlags_t;
 
 #ifdef COMM_USE_WINDOWS_BACKEND
 typedef unsigned long _CommSpeed_t;
+typedef unsigned long _CommCfg_t;
+typedef void *_CommHandle_t;
 #else
 typedef speed_t _CommSpeed_t;
-#endif
-
-typedef int _CommHandle_t;
-
-#ifdef COMM_USE_WINDOWS_BACKEND
-#define unsigned long _CommCfg_t;
-#else
 typedef termios _CommCfg_t;
+typedef int _CommHandle_t;
 #endif
+
+
 
 enum class ParityMode {
 	NONE,
@@ -42,6 +40,11 @@ enum class ParityMode {
 	SPACE,
 #endif
 };
+
+_CommHandle_t	port_open(const std::string &port);
+int				port_close(_CommHandle_t port);
+ssize_t			port_read(_CommHandle_t port, void * buffer, size_t sz);
+ssize_t			port_get_input_queue_size(_CommHandle_t port);
 
 class CommHandler {
 	std::shared_ptr<_CommCfg_t> cfg_;

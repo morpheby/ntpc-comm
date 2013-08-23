@@ -21,14 +21,38 @@ namespace util {
 std::string MakeDebugString(const std::string &file, int line, const std::string &funct);
 #endif
 
-class posix_error_exception {
+#ifdef DEBUG
+#define __MAKE_DEBUG_STRING2()		\
+	util::MakeDebugString(__FILE__, __LINE__, __func__)
+#define __MAKE_DEBUG_STRING() __MAKE_DEBUG_STRING2()
+#define MAKE_DEBUG_STRING() __MAKE_DEBUG_STRING()
+#else
+#define MAKE_DEBUG_STRING() std::string()
+#endif
+
+
+class info_exception : public std::exception{
+	std::string happenedWhile_;
+	std::string happenedIn_;
+
+public:
+	info_exception(const std::string& happenedWhile, const std::string &happenedIn);
+
+	std::string getWhile() const;
+
+	const char *what() const noexcept;
+};
+
+class posix_error_exception : public info_exception {
 	int error_;
 	std::string happenedWhile_;
+
 public:
-	posix_error_exception(const std::string& happenedWhile);
+	posix_error_exception(const std::string& happenedWhile,	const std::string &happenedIn);
 
 	int getErrno() const;
-	std::string getWhile() const;
+
+	const char *what() const noexcept;
 };
 
 class Logger : public std::enable_shared_from_this<Logger> {
@@ -57,12 +81,5 @@ public:
 };
 
 } /* namespace util */
-
-#ifdef DEBUG
-#define MAKE_DEBUG_STRING()		\
-	util::MakeDebugString(__FILE__, __LINE__, __func__)
-#else
-#define MAKE_DEBUG_STRING() std::string()
-#endif
 
 #endif /* LOGGER_H_ */

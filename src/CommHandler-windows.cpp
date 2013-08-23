@@ -13,7 +13,7 @@
 namespace comm {
 namespace internal {
 
-CommHandler::CommHandler() : cfg_(std::make_shared<termios>()), commDes_(0), desSet_(false) {
+CommHandler::CommHandler() : cfg_(std::make_shared<_CommCfg_t>()), commDes_(0), desSet_(false) {
 	resetProcessingFlags();
 }
 
@@ -102,5 +102,22 @@ bool CommHandler::isCommDescriptorSet() const {
 	return desSet_;
 }
 
+_CommHandle_t port_open(const std::string& port) {
+	return 0;
+}
+
+int port_close(_CommHandle_t port) {
+	return 0;
+}
+
+ssize_t port_read(_CommHandle_t port, void * buffer, size_t sz) {
+	return 0;
+}
+
+ssize_t port_get_input_queue_size(_CommHandle_t port) {
+	return 0;
+}
+
 } /* namespace internal */
 } /* namespace comm */
+

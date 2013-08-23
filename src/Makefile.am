@@ -23,7 +23,7 @@ __bins__ntpccomm_SOURCES	=									\
 								SerialComm.h					\
 								SerialComm.hpp					
 
-EXTRA__bins__ntpccomm_SOURCES	= 								\
+EXTRA___bins__ntpccomm_SOURCES	= 								\
 									CommHandler-unix.cpp		\
 									CommHandler-windows.cpp		
 									

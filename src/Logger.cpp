@@ -14,16 +14,32 @@ namespace util {
 
 Logger * Logger::instance_;
 
-posix_error_exception::posix_error_exception(const std::string& happenedWhile) :
-		error_(errno), happenedWhile_(happenedWhile) {
+info_exception::info_exception(const std::string &happenedWhile, const std::string &happenedIn) :
+		happenedWhile_(happenedWhile),
+		happenedIn_(happenedIn) {
+}
+
+std::string info_exception::getWhile() const {
+	return happenedWhile_ + happenedIn_;
+}
+
+const char * info_exception::what() const noexcept {
+	return ("Exception occured while " + getWhile()).c_str();
+}
+
+posix_error_exception::posix_error_exception(const std::string& happenedWhile,
+			const std::string& happenedIn) :
+		info_exception(happenedWhile, happenedIn),
+		error_(errno) {
 }
 
 int posix_error_exception::getErrno() const {
 	return error_;
 }
 
-std::string posix_error_exception::getWhile() const {
-	return happenedWhile_;
+const char * posix_error_exception::what() const noexcept {
+	return ("Error occured - " + Logger::getPosixErrorDescription(getErrno()) +
+			" - while " + getWhile()).c_str();
 }
 
 
@@ -46,7 +62,7 @@ void Logger::logPosixError(int err, const std::string& comment) {
 
 #ifdef DEBUG
 std::string MakeDebugString(const std::string &file, int line, const std::string &funct) {
-	return " // " + file + ":" + std::to_string(line) + ": " + funct;
+	return " // from " + file + ":" + std::to_string(line) + ": " + funct;
 }
 #endif
 

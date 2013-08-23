@@ -39,14 +39,14 @@ int main(int argc, char **argv) {
 		std::cout << std::hex;
 		std::copy(rdbuf.begin(), rdbuf.end(), std::ostream_iterator<uint16_t>(std::cout, " "));
 		std::cout << std::endl;
+	} catch(const util::posix_error_exception &e) {
+		logger->logPosixError(e.getErrno(), e.getWhile());
 	} catch(const std::exception &e) {
 		logger->logException(e);
 	} catch(const char *str) {
 		logger->logException(str);
 	} catch(const std::string &s) {
 		logger->logException(s);
-	} catch(const util::posix_error_exception &e) {
-		logger->logPosixError(e.getErrno(), e.getWhile());
 	}
 
 	return 0;

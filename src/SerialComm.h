@@ -41,7 +41,7 @@ class SerialComm {
 	static uint16_t processParityBit(char recieved, bool isParityError, internal::ParityMode parMode);
 	static bool getEvenParity(char byte);
 	static bool getOddParity(char byte);
-	size_t readNoLock(int filedes, uint8_t *buf, size_t sz);
+	size_t readNoLock(uint8_t *buf, size_t sz);
 
 	void write9BitByte(uint16_t byte);
 protected:

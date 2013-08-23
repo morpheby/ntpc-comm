@@ -10,10 +10,14 @@
 #include "CommHandler.h"
 #include "Logger.h"
 
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+
 namespace comm {
 namespace internal {
 
-CommHandler::CommHandler() : cfg_(std::make_shared<termios>()), commDes_(0), desSet_(false) {
+CommHandler::CommHandler() : cfg_(std::make_shared<_CommCfg_t>()), commDes_(0), desSet_(false) {
 	resetProcessingFlags();
 }
 
@@ -25,7 +29,8 @@ void CommHandler::setBaud(_CommSpeed_t baud) {
 			" to " + std::to_string(baud));
 	if(cfsetispeed(getCommConfigPtr().get(), baud) < 0 ||
 	   cfsetospeed(getCommConfigPtr().get(), baud) < 0) {
-		throw util::posix_error_exception("setting port speed to" + std::to_string(baud) + MAKE_DEBUG_STRING());
+		throw util::posix_error_exception("setting port speed to" + std::to_string(baud),
+				MAKE_DEBUG_STRING());
 	}
 	writeConfig();
 }
@@ -181,7 +186,7 @@ void CommHandler::readConfig() {
 	if(isCommDescriptorSet()) {
 		util::Logger::getInstance()->log("Reading configuration for port " + std::to_string(commDes_));
 		if(tcgetattr((int) getCommDescriptor(), getCommConfigPtr().get()) < 0)
-			throw util::posix_error_exception("reading configuration from port" + MAKE_DEBUG_STRING());
+			throw util::posix_error_exception("reading configuration from port", MAKE_DEBUG_STRING());
 	}
 }
 
@@ -189,7 +194,7 @@ void CommHandler::writeConfig() {
 	if(isCommDescriptorSet()) {
 		util::Logger::getInstance()->log("Writing configuration for port " + std::to_string(commDes_));
 		if(tcsetattr((int) getCommDescriptor(), TCSAFLUSH, getCommConfigPtr().get()) < 0)
-			throw util::posix_error_exception("writing configuration to port" + MAKE_DEBUG_STRING());
+			throw util::posix_error_exception("writing configuration to port", MAKE_DEBUG_STRING());
 	}
 }
 
@@ -211,6 +216,29 @@ void CommHandler::setMapBreakToInterrupt(bool map) {
 
 bool CommHandler::isCommDescriptorSet() const {
 	return desSet_;
+}
+
+_CommHandle_t port_open(const std::string& port) {
+	int commDes = ::open(port.c_str(), O_RDWR | O_NONBLOCK | O_NOCTTY);
+	if(commDes == -1)
+		throw util::posix_error_exception("opening port", MAKE_DEBUG_STRING());
+	if(!::isatty(commDes))
+		throw util::info_exception(port + " is not a tty", MAKE_DEBUG_STRING());
+	return commDes;
+}
+
+int port_close(_CommHandle_t port) {
+	return ::close(port);
+}
+
+ssize_t port_read(_CommHandle_t port, void * buffer, size_t sz) {
+	return ::read(port, buffer, sz);
+}
+
+ssize_t port_get_input_queue_size(_CommHandle_t port) {
+	int count;
+	::ioctl(port, FIONREAD, &count);
+	return count;
 }
 
 } /* namespace internal */
