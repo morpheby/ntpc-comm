@@ -32,6 +32,7 @@ depcomp
 install-sh
 missing
 autom4te.cache/
+test-driver
 
 # OS stuff
 .DS_Store
