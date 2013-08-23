@@ -4,6 +4,7 @@ Debug/
 Release/
 debug*/
 release*/
+build*/
 .cproject
 .project
 .settings
