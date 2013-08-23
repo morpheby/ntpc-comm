@@ -62,7 +62,7 @@ public:
 #define MAKE_DEBUG_STRING()		\
 	util::MakeDebugString(__FILE__, __LINE__, __func__)
 #else
-#define MAKE_DEBUG_STRING() ""
+#define MAKE_DEBUG_STRING() std::string()
 #endif
 
 #endif /* LOGGER_H_ */
