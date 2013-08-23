@@ -41,10 +41,10 @@ void CommHandler::setStopBitsCount(int count) {
 int CommHandler::getStopBitsCount() const {
 }
 
-void CommHandler::setRecieveEnable(bool enable) {
+void CommHandler::setReceiveEnable(bool enable) {
 }
 
-bool CommHandler::isRecieveEnabled() const {
+bool CommHandler::isReceiveEnabled() const {
 }
 
 void CommHandler::setParityMode(ParityMode mode) {

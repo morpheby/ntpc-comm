@@ -36,9 +36,6 @@ int main(int argc, char **argv) {
 
 		serial.read(rdbuf.begin(), rdbuf.end());
 
-		std::cout << std::hex;
-		std::copy(rdbuf.begin(), rdbuf.end(), std::ostream_iterator<uint16_t>(std::cout, " "));
-		std::cout << std::endl;
 	} catch(const util::posix_error_exception &e) {
 		logger->logPosixError(e.getErrno(), e.getWhile());
 	} catch(const std::exception &e) {

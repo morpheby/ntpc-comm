@@ -19,12 +19,12 @@ namespace comm {
 
 SerialComm::SerialComm(const std::string &connStr) :
 	connStr_(connStr), exiting_(false), commPort_(std::make_shared<internal::CommHandler>()),
-	recieveWorker_() {
+	receiveWorker_() {
 	util::Logger::getInstance()->log("Opening port " + connStr);
 	internal::_CommHandle_t commDes = internal::port_open(connStr);
 	getCommHandler()->setCommDescriptor(commDes);
 	resetCommConfig();
-	recieveWorker_ = std::thread(&SerialComm::dataReader, this);
+	receiveWorker_ = std::thread(&SerialComm::dataReader, this);
 }
 
 std::shared_ptr<internal::CommHandler> SerialComm::getCommHandler() const {
@@ -39,7 +39,7 @@ void SerialComm::resetCommConfig() {
 	handler->setBaud(9600);
 	handler->set8BitComm();
 	handler->setStopBitsCount(2);
-	handler->setRecieveEnable(true);
+	handler->setReceiveEnable(true);
 	handler->setPlatformCompatibilityFlags();
 	handler->setMapBreakToInterrupt(true);
 	handler->setParityErrorCheckEnable(true);
@@ -55,11 +55,11 @@ void SerialComm::resetCommConfig() {
 uint16_t SerialComm::read9BitByte() {
 	std::unique_lock<std::mutex> lock(recvMutex_);
 
-	while(recieveBuffer_.empty())
-		recieveDataReady_.wait(lock);
+	while(receiveBuffer_.empty())
+		receiveDataReady_.wait(lock);
 
-	uint16_t byte = recieveBuffer_.front();
-	recieveBuffer_.pop();
+	uint16_t byte = receiveBuffer_.front();
+	receiveBuffer_.pop();
 	return byte;
 }
 
@@ -90,20 +90,20 @@ int SerialComm::processRawDataStream() {
 		} else {
 			byte = processParityBit(rcv[0], false, parMode);
 		}
-		recieveBuffer_.push(byte);
+		receiveBuffer_.push(byte);
 	}
 
-	util::Logger::getInstance()->trace("Recieved byte " + std::to_string(byte) + MAKE_DEBUG_STRING());
+	util::Logger::getInstance()->trace("Received byte " + std::to_string(byte) + MAKE_DEBUG_STRING());
 
 	for(int i = 0; i < sz; ++i)
-		recieveDataReady_.notify_one();
+		receiveDataReady_.notify_one();
 
 	return sz;
 }
 
-uint16_t SerialComm::processParityBit(char recieved, bool isParityError,
+uint16_t SerialComm::processParityBit(char received, bool isParityError,
 		internal::ParityMode parMode) {
-	uint16_t rcv = (uint8_t) recieved;
+	uint16_t rcv = (uint8_t) received;
 	switch(parMode) {
 #ifndef NO_SPACEMARK_PARITY
 	case internal::ParityMode::SPACE:
@@ -116,11 +116,11 @@ uint16_t SerialComm::processParityBit(char recieved, bool isParityError,
 		break;
 #endif
 	case internal::ParityMode::ODD:
-		if(getOddParity(recieved) == !isParityError)
+		if(getOddParity(received) == !isParityError)
 			rcv |= (1<<8);
 		break;
 	case internal::ParityMode::EVEN:
-		if(getEvenParity(recieved) == !isParityError)
+		if(getEvenParity(received) == !isParityError)
 			rcv |= (1<<8);
 		break;
 	case internal::ParityMode::NONE:
@@ -211,7 +211,7 @@ SerialComm::~SerialComm() {
 		std::lock_guard<std::mutex> lock(exitMutex_);
 		exiting_ = true; // atomically set exit flag
 	}
-	recieveWorker_.join();
+	receiveWorker_.join();
 
 	auto handler = getCommHandler();
 	internal::_CommHandle_t commDes = handler->getCommDescriptor();

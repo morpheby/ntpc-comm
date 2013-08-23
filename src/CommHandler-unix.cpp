@@ -73,7 +73,7 @@ int CommHandler::getStopBitsCount() const {
 	return 1 + !!(getCommConfigPtr()->c_cflag & CSTOPB);
 }
 
-void CommHandler::setRecieveEnable(bool enable) {
+void CommHandler::setReceiveEnable(bool enable) {
 	getCommConfigPtr()->c_cflag =
 			enable
 			? (CREAD | getCommConfigPtr()->c_cflag)
@@ -81,7 +81,7 @@ void CommHandler::setRecieveEnable(bool enable) {
 	writeConfig();
 }
 
-bool CommHandler::isRecieveEnabled() const {
+bool CommHandler::isReceiveEnabled() const {
 	return getCommConfigPtr()->c_cflag & CREAD;
 }
 

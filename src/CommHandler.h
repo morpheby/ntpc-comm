@@ -64,8 +64,8 @@ public:
 	void setStopBitsCount(int count);
 	int getStopBitsCount() const;
 
-	void setRecieveEnable(bool enable);
-	bool isRecieveEnabled() const;
+	void setReceiveEnable(bool enable);
+	bool isReceiveEnabled() const;
 
 	void setParityMode(ParityMode mode);
 	ParityMode getParityMode() const;

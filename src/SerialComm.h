@@ -28,17 +28,17 @@ class SerialComm {
 	std::string connStr_;
 	bool exiting_;
 	std::shared_ptr<internal::CommHandler> commPort_;
-	std::thread recieveWorker_, sendWorker_;
+	std::thread receiveWorker_, sendWorker_;
 	std::mutex portConfigMutex_, recvMutex_, sendMMutex_, exitMutex_;
-	std::condition_variable recieveDataReady_;
+	std::condition_variable receiveDataReady_;
 
-	std::queue<uint16_t> recieveBuffer_;
+	std::queue<uint16_t> receiveBuffer_;
 
 
 	uint16_t read9BitByte();
 	int processRawDataStream();
 
-	static uint16_t processParityBit(char recieved, bool isParityError, internal::ParityMode parMode);
+	static uint16_t processParityBit(char received, bool isParityError, internal::ParityMode parMode);
 	static bool getEvenParity(char byte);
 	static bool getOddParity(char byte);
 	size_t readNoLock(uint8_t *buf, size_t sz);
