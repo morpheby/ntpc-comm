@@ -167,7 +167,7 @@ void SerialComm::dataReader() {
 			if(exiting_)	 // atomically check for exit condition
 				break;
 		}
-		int count;
+		ssize_t count;
 		{
 			std::lock_guard<std::mutex> lock(portConfigMutex_); // don't allow changes while data is present
 			count = internal::port_get_input_queue_size(getCommHandler()->getCommDescriptor());
@@ -207,6 +207,7 @@ size_t SerialComm::readNoLock(uint8_t* buf, size_t sz) {
 }
 
 SerialComm::~SerialComm() {
+	util::Logger::getInstance()->log("Stopping communication and closing port...");
 	{
 		std::lock_guard<std::mutex> lock(exitMutex_);
 		exiting_ = true; // atomically set exit flag
