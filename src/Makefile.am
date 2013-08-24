@@ -24,12 +24,15 @@ libntpccomm_a_SOURCES			=									\
 									Log.cpp							\
 									Logger.cpp						\
 									SerialComm.cpp					\
+									Atom.cpp						\
 																	\
 									CommHandler.h					\
 									Log.h							\
 									Logger.h						\
 									SerialComm.h					\
-									SerialComm.hpp					
+									SerialComm.hpp					\
+									Atom.h							\
+									Atom.hpp						
 
 EXTRA_libntpccomm_a_SOURCES	= 									\
 									CommHandler-unix.cpp		\
