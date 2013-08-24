@@ -197,12 +197,10 @@ size_t SerialComm::readNoLock(uint8_t* buf, size_t sz) {
 }
 
 bool SerialComm::isExiting() {
-	std::lock_guard<std::mutex> lock(exitMutex_);
 	return exiting_;
 }
 
 void SerialComm::setExiting(bool exiting) {
-	std::lock_guard<std::mutex> lock(exitMutex_);
 	exiting_ = exiting;
 }
 
