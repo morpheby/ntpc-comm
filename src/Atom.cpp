@@ -5,6 +5,7 @@
  *      Author: morpheby
  */
 
+#include "platform.h"
 #include "Atom.h"
 
 namespace util {

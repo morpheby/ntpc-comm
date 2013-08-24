@@ -32,7 +32,8 @@ public:
 
 	~Atom();
 
-	T operator T();
+	operator T();
+
 	Atom<T>& operator = (Atom<T>&);
 	Atom<T>& operator = (Atom<T>&&);
 	Atom<T>& operator = (const T&);

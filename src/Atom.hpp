@@ -57,7 +57,7 @@ void Atom<T>::setValue(T&& v) {
 }
 
 template <class T>
-T Atom<T>::operator T() {
+Atom<T>::operator T() {
 	return getValue();
 }
 
@@ -75,7 +75,6 @@ Atom<T>& Atom<T>::operator = (const T& v) {
 
 template <class T>
 Atom<T>& Atom<T>::operator = (Atom<T>&& av) {
-	std::lock_guard<std::mutex> lock(av.atomMutex_);
 	setValue(std::move(av.valueHeld_));
 	return *this;
 }
