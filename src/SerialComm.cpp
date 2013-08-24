@@ -196,7 +196,7 @@ size_t SerialComm::readNoLock(uint8_t* buf, size_t sz) {
 	return readSz;
 }
 
-bool SerialComm::isExiting() {
+bool SerialComm::isExiting() const {
 	return exiting_;
 }
 
