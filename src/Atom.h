@@ -8,6 +8,8 @@
 #ifndef ATOM_H_
 #define ATOM_H_
 
+#include <mutex>
+
 namespace util {
 
 template <typename T>
@@ -15,12 +17,26 @@ class Atom;
 
 template <typename T>
 class Atom {
+	std::mutex atomMutex_;
+	T valueHeld_;
+
+	T getValue();
+	void setValue(const T&);
+	void setValue(T&&);
 public:
 	Atom();
 	Atom(const T&);
-	virtual ~Atom();
+	Atom(T&&);
+	Atom(Atom<T>&);
+	Atom(Atom<T>&&);
+
+	~Atom();
 
 	T operator T();
+	Atom<T>& operator = (Atom<T>&);
+	Atom<T>& operator = (Atom<T>&&);
+	Atom<T>& operator = (const T&);
+	Atom<T>& operator = (T&&);
 };
 
 
