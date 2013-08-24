@@ -15,7 +15,7 @@
 #include <condition_variable>
 #include <queue>
 
-#include "Atom.h"
+#include <atomic>
 
 /* Add -DNO_SPACEMARK_PARITY, if your model doesn't support space/mark parity */
 
@@ -28,7 +28,7 @@ enum class ParityMode;
 
 class SerialComm {
 	const std::string connStr_;
-	util::Atom<bool> exiting_;
+	std::atomic<bool> exiting_;
 	const std::shared_ptr<internal::CommHandler> commPort_;
 	std::thread receiveWorker_, sendWorker_;
 	std::mutex portConfigMutex_, recvMutex_, sendMMutex_, exitMutex_;
