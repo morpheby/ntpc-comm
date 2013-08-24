@@ -20,7 +20,7 @@ class Atom {
 	std::mutex atomMutex_;
 	T valueHeld_;
 
-	T getValue();
+	T getValue() const;
 	void setValue(const T&);
 	void setValue(T&&);
 public:
@@ -32,7 +32,7 @@ public:
 
 	~Atom();
 
-	operator T();
+	operator T() const;
 
 	Atom<T>& operator = (Atom<T>&);
 	Atom<T>& operator = (Atom<T>&&);
