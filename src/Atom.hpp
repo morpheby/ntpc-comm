@@ -39,8 +39,8 @@ Atom<T>::~Atom () {
 }
 
 template <class T>
-T Atom<T>::getValue() {
-	std::lock_guard<std::mutex> lock(atomMutex_);
+T Atom<T>::getValue() const {
+	std::lock_guard<std::mutex> lock(const_cast<Atom<T>*>(this)->atomMutex_);
 	return valueHeld_;
 }
 
@@ -57,7 +57,7 @@ void Atom<T>::setValue(T&& v) {
 }
 
 template <class T>
-Atom<T>::operator T() {
+Atom<T>::operator T() const {
 	return getValue();
 }
 
