@@ -51,7 +51,7 @@ protected:
 public:
 	SerialComm(const std::string &connectionString);
 	virtual ~SerialComm();
-	bool isExiting() const;
+	bool isExiting();
 	void setExiting(bool exiting);
 	template <typename _ForwardIterator>
 	void read(_ForwardIterator begin, _ForwardIterator end);

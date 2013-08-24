@@ -196,7 +196,7 @@ size_t SerialComm::readNoLock(uint8_t* buf, size_t sz) {
 	return readSz;
 }
 
-bool SerialComm::isExiting() const {
+bool SerialComm::isExiting() {
 	std::lock_guard<std::mutex> lock(exitMutex_);
 	return exiting_;
 }
