@@ -17,6 +17,11 @@
 #include "Log.h"
 #include "Logger.h"
 
+void logging_terminate_handler() {
+	util::Logger::getInstance()->logException("Terminate called on active thread. Aborting...");
+	std::abort();
+}
+
 int main(int argc, char **argv) {
 	if(argc != 2) {
 		std::cout << "Usage:" << std::endl
