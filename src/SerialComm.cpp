@@ -161,27 +161,17 @@ bool SerialComm::getOddParity(char byte) {
 }
 
 void SerialComm::dataReader() {
-	while(true) {
-		{
-			std::lock_guard<std::mutex> lock(exitMutex_);
-			if(exiting_)	 // atomically check for exit condition
-				break;
-		}
+	while(!isExiting()) {
 		ssize_t count;
 		{
 			std::lock_guard<std::mutex> lock(portConfigMutex_); // don't allow changes while data is present
 			count = internal::port_get_input_queue_size(getCommHandler()->getCommDescriptor());
 			do {
-				{
-					std::lock_guard<std::mutex> lock(exitMutex_);
-					if(exiting_)	 // atomically check for exit condition
-						break;
-				}
 				while(count > 0) {
 					count -= processRawDataStream();
 				}
 				count = internal::port_get_input_queue_size(getCommHandler()->getCommDescriptor());
-			} while(count > 0);
+			} while(count > 0 && !isExiting());
 		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
@@ -206,12 +196,19 @@ size_t SerialComm::readNoLock(uint8_t* buf, size_t sz) {
 	return readSz;
 }
 
+bool SerialComm::isExiting() const {
+	std::lock_guard<std::mutex> lock(exitMutex_);
+	return exiting_;
+}
+
+void SerialComm::setExiting(bool exiting) {
+	std::lock_guard<std::mutex> lock(exitMutex_);
+	exiting_ = exiting;
+}
+
 SerialComm::~SerialComm() {
 	util::Logger::getInstance()->log("Stopping communication and closing port...");
-	{
-		std::lock_guard<std::mutex> lock(exitMutex_);
-		exiting_ = true; // atomically set exit flag
-	}
+	setExiting(true); // atomically set exit flag
 	receiveWorker_.join();
 
 	auto handler = getCommHandler();
