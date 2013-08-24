@@ -14,7 +14,6 @@
 namespace rs485 {
 
 void Rs485CommLineWorker::setReceiveActive(bool receiveActive) {
-	std::lock_guard<std::mutex> lock(receiveFlagsMutex_);
 	receiveActive_ = receiveActive;
 }
 
@@ -42,13 +41,11 @@ const std::unique_ptr<comm::SerialComm>& Rs485CommLineWorker::getConnection() co
 	return connection_;
 }
 
-bool Rs485CommLineWorker::isPromiscuousMode() const {
-	std::lock_guard<std::mutex> lock(receiveFlagsMutex_);
+bool Rs485CommLineWorker::isPromiscuousMode() {
 	return promiscuousMode_;
 }
 
 void Rs485CommLineWorker::setPromiscuousMode(bool promiscuousMode) {
-	std::lock_guard<std::mutex> lock(receiveFlagsMutex_);
 	promiscuousMode_ = promiscuousMode;
 }
 
@@ -80,18 +77,15 @@ void Rs485CommLineWorker::rs485Worker() {
 	}
 }
 
-bool Rs485CommLineWorker::isReceiveActive() const {
-	std::lock_guard<std::mutex> lock(receiveFlagsMutex_);
+bool Rs485CommLineWorker::isReceiveActive() {
 	return receiveActive_;
 }
 
-bool Rs485CommLineWorker::isExiting() const {
-	std::lock_guard<std::mutex> lock(receiveFlagsMutex_);
+bool Rs485CommLineWorker::isExiting() {
 	return exiting_;
 }
 
 void Rs485CommLineWorker::setExiting(bool exiting) {
-	std::lock_guard<std::mutex> lock(receiveFlagsMutex_);
 	exiting_ = exiting;
 }
 

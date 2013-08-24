@@ -13,6 +13,8 @@
 #include <memory>
 #include <mutex>
 
+#include "Atom.h"
+
 #include "SerialComm.h"
 
 namespace rs485 {
@@ -20,14 +22,14 @@ namespace rs485 {
 typedef uint8_t _MachineAddress_t;
 
 class Rs485CommLineWorker {
-	_MachineAddress_t localAddress_;
+	const _MachineAddress_t localAddress_;
 	std::thread worker_;
-	bool receiveActive_;
-	bool promiscuousMode_;
-	bool exiting_;
+	util::Atom<bool> receiveActive_;
+	util::Atom<bool> promiscuousMode_;
+	util::Atom<bool> exiting_;
 	std::queue<uint8_t> dataStream_;
 	std::unique_ptr<comm::SerialComm> connection_;
-	std::mutex receiveFlagsMutex_, receiveDataMutex_;
+	std::mutex receiveDataMutex_;
 
 	void rs485Worker();
 
@@ -44,13 +46,13 @@ public:
 
 	const std::unique_ptr<comm::SerialComm>& getConnection() const;
 
-	bool isPromiscuousMode() const;
+	bool isPromiscuousMode();
 
 	void setPromiscuousMode(bool promiscuousMode);
 
-	bool isReceiveActive() const;
+	bool isReceiveActive();
 
-	bool isExiting() const;
+	bool isExiting();
 
 	void setExiting(bool exiting);
 };
