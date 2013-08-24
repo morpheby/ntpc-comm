@@ -1,0 +1,10 @@
+2013-08-25  morpheby  <morpheby@Morpheby-MBAir.local>
+
+	* CommHandler: Separated UNIX and Windows code. Windows code is not yet
+	implemented.
+	* Atom: Tried to change from util::Atom to std::atomic -- it happens, that one
+	doesn't want to be used even with user-defined structs. Seems like GCC doesn't
+	support it yet, linkage fails, asking for store() and load() specializations.
+	* SerialComm: There is working implementation now of 9-bit serial reader and
+	some tests for it.
+
