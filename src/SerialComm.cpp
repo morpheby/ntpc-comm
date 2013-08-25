@@ -25,6 +25,7 @@ SerialComm::SerialComm(const std::string &connStr) :
 	getCommHandler()->setCommDescriptor(commDes);
 	resetCommConfig();
 	receiveWorker_ = std::thread(&SerialComm::dataReader, this);
+	sendWorker_ = std::thread(&SerialComm::dataWriter, this);
 }
 
 std::shared_ptr<internal::CommHandler> SerialComm::getCommHandler() const {
@@ -129,7 +130,7 @@ uint16_t SerialComm::processParityBit(char received, bool isParityError,
 	return rcv;
 }
 
-bool SerialComm::getEvenParity(char byte) {
+bool SerialComm::getEvenParity(uint8_t byte) {
 //	bool p = false;
 //	for(; byte; byte >>= 1)
 //		p ^= byte & 1;
@@ -153,10 +154,10 @@ bool SerialComm::getEvenParity(char byte) {
 		1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
 		1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
 		0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0};
-	return parity[(uint8_t)byte];
+	return parity[byte];
 }
 
-bool SerialComm::getOddParity(char byte) {
+bool SerialComm::getOddParity(uint8_t byte) {
 	return getEvenParity(byte) ^ 1;
 }
 
@@ -198,6 +199,52 @@ size_t SerialComm::readNoLock(uint8_t* buf, size_t sz) {
 
 bool SerialComm::isExiting() const {
 	return exiting_;
+}
+
+void SerialComm::write9BitByte(uint16_t byte) {
+	{
+		std::lock_guard<std::mutex> lock (sendMutex_);
+		sendBuffer_.push(byte);
+	}
+	sendDataReady_.notify_one();
+}
+
+void SerialComm::dataWriter() {
+	while(!isExiting()) {
+		std::unique_lock<std::mutex> lock(sendMutex_);
+
+		while(sendBuffer_.empty())
+			sendDataReady_.wait(lock);
+
+		while(!sendBuffer_.empty()) {
+			processRawOutput(sendBuffer_.front());
+			sendBuffer_.pop();
+		}
+	}
+}
+
+internal::ParityMode SerialComm::processParityReverse(uint16_t byteToSend) {
+#ifndef NO_SPACEMARK_PARITY
+	if(byteToSend & (1 << 8))
+		return internal::ParityMode::MARK;
+	else
+		return internal::ParityMode::SPACE;
+#else
+	if(getEvenParity(byteToSend & 0xFF) != (byteToSend >> 8))
+		return internal::ParityMode::ODD;
+	else
+		return internal::ParityMode::EVEN;
+#endif
+}
+
+void SerialComm::processRawOutput(uint16_t byte) {
+	// lock port configuration while we send data
+	std::lock_guard<std::mutex> lock (portConfigMutex_);
+	internal::ParityMode parity = processParityReverse(byte);
+	if(getCommHandler()->getParityMode() != parity)
+		getCommHandler()->setParityMode(parity);
+
+	internal::port_write(getCommHandler()->getCommDescriptor(), &byte, 1);
 }
 
 void SerialComm::setExiting(bool exiting) {

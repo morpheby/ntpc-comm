@@ -44,6 +44,7 @@ enum class ParityMode {
 _CommHandle_t	port_open(const std::string &port);
 int				port_close(_CommHandle_t port);
 ssize_t			port_read(_CommHandle_t port, void * buffer, size_t sz);
+ssize_t			port_write(_CommHandle_t port, const void * buffer, size_t sz);
 ssize_t			port_get_input_queue_size(_CommHandle_t port);
 
 class CommHandler {
