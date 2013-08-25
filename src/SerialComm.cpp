@@ -180,12 +180,7 @@ void SerialComm::dataReader() {
 
 size_t SerialComm::readNoLock(uint8_t* buf, size_t sz) {
 	size_t readSz = 0;
-	while(readSz < sz) {
-		{
-			std::lock_guard<std::mutex> lock(exitMutex_);
-			if(exiting_)	 // atomically check for exit condition
-				return readSz;
-		}
+	while(readSz < sz && !isExiting()) {
 		ssize_t ret = internal::port_read(getCommHandler()->getCommDescriptor(), buf+readSz, sz-readSz);
 		if(ret == -1) {
 			util::Logger::getInstance()->logWarning("Error while reading from stream - " +
