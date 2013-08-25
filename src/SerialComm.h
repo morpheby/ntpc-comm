@@ -31,7 +31,7 @@ class SerialComm {
 	util::Atom<bool> exiting_;
 	const std::shared_ptr<internal::CommHandler> commPort_;
 	std::thread receiveWorker_, sendWorker_;
-	std::mutex portConfigMutex_, recvMutex_, sendMutex_, exitMutex_;
+	std::mutex portConfigMutex_, recvMutex_, sendMutex_;
 	std::condition_variable receiveDataReady_, sendDataReady_;
 
 	std::queue<uint16_t> receiveBuffer_, sendBuffer_;

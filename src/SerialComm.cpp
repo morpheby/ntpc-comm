@@ -14,6 +14,8 @@
 #include <functional>
 #include "Logger.h"
 
+#define MAX_ERRORS_ON_STREAM 5
+
 namespace comm {
 
 
@@ -180,11 +182,16 @@ void SerialComm::dataReader() {
 
 size_t SerialComm::readNoLock(uint8_t* buf, size_t sz) {
 	size_t readSz = 0;
+	int errorCount = 0;
 	while(readSz < sz && !isExiting()) {
 		ssize_t ret = internal::port_read(getCommHandler()->getCommDescriptor(), buf+readSz, sz-readSz);
 		if(ret == -1) {
 			util::Logger::getInstance()->logWarning("Error while reading from stream - " +
 					util::Logger::getPosixErrorDescription(errno) + MAKE_DEBUG_STRING());
+			++errorCount;
+			if(errorCount == MAX_ERRORS_ON_STREAM)
+				throw util::posix_error_exception(" reading from stream, got MAX_ERRORS_ON_STREAM, aborting",
+						MAKE_DEBUG_STRING());
 			continue;
 		}
 		readSz += ret;
@@ -225,7 +232,7 @@ internal::ParityMode SerialComm::processParityReverse(uint16_t byteToSend) {
 	else
 		return internal::ParityMode::SPACE;
 #else
-	if(getEvenParity(byteToSend & 0xFF) != (byteToSend >> 8))
+	if(getEvenParity(byteToSend & 0xFFU) != (byteToSend >> 8))
 		return internal::ParityMode::ODD;
 	else
 		return internal::ParityMode::EVEN;
@@ -236,10 +243,40 @@ void SerialComm::processRawOutput(uint16_t byte) {
 	// lock port configuration while we send data
 	std::lock_guard<std::mutex> lock (portConfigMutex_);
 	internal::ParityMode parity = processParityReverse(byte);
-	if(getCommHandler()->getParityMode() != parity)
+	if(getCommHandler()->getParityMode() != parity) {
+#ifdef DEBUG
+		std::string parStr;
+		switch(parity) {
+		case internal::ParityMode::EVEN:
+			parStr = "ParityMode::EVEN";
+			break;
+		case internal::ParityMode::ODD:
+			parStr = "ParityMode::ODD";
+			break;
+#ifndef NO_SPACEMARK_PARITY
+		case internal::ParityMode::SPACE:
+			parStr = "ParityMode::SPACE";
+			break;
+		case internal::ParityMode::MARK:
+			parStr = "ParityMode::MARK";
+			break;
+#endif
+		default:
+			parStr = "--WRONG PARITY--";
+			break;
+		}
+		util::Logger::getInstance()->trace("Switching parity to " + parStr + MAKE_DEBUG_STRING());
+#endif
 		getCommHandler()->setParityMode(parity);
+	}
 
-	internal::port_write(getCommHandler()->getCommDescriptor(), &byte, 1);
+	ssize_t ret = internal::port_write(getCommHandler()->getCommDescriptor(), &byte, 1);
+	if(ret == -1) {
+		util::Logger::getInstance()->logWarning("Error while writing to stream [" +
+				std::to_string(byte) + "] - " +
+				util::Logger::getPosixErrorDescription(errno) + MAKE_DEBUG_STRING());
+	} else
+		util::Logger::getInstance()->trace("Written byte " + std::to_string(byte) + MAKE_DEBUG_STRING());
 }
 
 void SerialComm::setExiting(bool exiting) {
